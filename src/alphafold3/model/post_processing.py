@@ -86,6 +86,12 @@ def post_process_inference_result(
   )
 
 
+def save_distogram(distogram, filename):
+  distogram = distogram.cpu().numpy()
+  np.save(filename, distogram)
+
+
+
 def write_output(
     inference_result: base_model.InferenceResult,
     output_dir: os.PathLike[str] | str,
@@ -99,6 +105,12 @@ def write_output(
 
   with open(os.path.join(output_dir, f'{prefix}model.cif'), 'wb') as f:
     f.write(processed_result.cif)
+
+  # NOTE: This is not part of the standard output, but is useful for AFL-MI
+  np.save(
+    os.path.join(output_dir, f'{prefix}distogram.npy'), 
+    inference_result.predicted_distogram.cpu().numpy()
+    )
 
   with open(
       os.path.join(output_dir, f'{prefix}summary_confidences.json'), 'wb'
